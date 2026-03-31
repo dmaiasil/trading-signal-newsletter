@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env-tv-newsletter/
+
+# Database
+*.db
+*.sqlite3
+
+# Environment/Secrets
+.env
+
+# OS
+.DS_Store

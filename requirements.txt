@@ -1,0 +1,8 @@
+fastapi==0.135.2
+uvicorn==0.42.0
+SQLAlchemy==2.0.48
+resend==2.26.0
+python-dotenv==1.2.2
+pandas_market_calendars==5.3.1.2
+pydantic==2.12.5
+requests==2.33.1
