@@ -20,7 +20,7 @@ def send_newsletter():
         open_positions = db.query(Signal).filter(Signal.status == "open").all()
 
         # 2. Build HTML
-        subject = f"Trading Report: {datetime.date.today().strftime('%b %d, %Y')}"
+        subject = f"Sinais M3: {datetime.date.today().strftime('%b %d, %Y')}"
         html_content = "<h1>Daily Trading Intelligence Report</h1>"
         
         # Section: Today's Signals Grouped by List
