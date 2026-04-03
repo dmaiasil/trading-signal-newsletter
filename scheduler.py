@@ -1,6 +1,7 @@
 import os
 import datetime
 import resend
+import pytz
 from dotenv import load_dotenv
 from database import SessionLocal, Signal
 
@@ -14,75 +15,65 @@ def send_newsletter():
     db = SessionLocal()
     
     try:
-        # 1. Get Data
-        today_start = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        # 1. Get Data (Using US/Eastern to match your local database timestamps)
+        tz = pytz.timezone('US/Eastern')
+        today_start = datetime.datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Query only today's signals
         signals_today = db.query(Signal).filter(Signal.timestamp >= today_start).all()
-        open_positions = db.query(Signal).filter(Signal.status == "open").all()
 
         # 2. Build HTML
-        subject = f"Sinais M3: {datetime.date.today().strftime('%b %d, %Y')}"
-        html_content = "<h1>Daily Trading Intelligence Report</h1>"
+        subject = f"Trading Signals Report: {datetime.date.today().strftime('%b %d, %Y')}"
+        html_content = "<h1 style='font-family: sans-serif;'>Daily Signal Summary</h1>"
         
-        # Section: Today's Signals Grouped by List
-        html_content += "<h2>Today's Signals</h2>"
-        
-        target_lists = ["List A", "List B", "List C"]
+        # Define your active list names here
+        target_lists = ["Tier 1"] 
         
         for list_name in target_lists:
-            # Filter signals belonging to this specific list
             list_signals = [s for s in signals_today if s.list_name == list_name]
             
-            html_content += f"<h3>{list_name}</h3>"
+            html_content += f"<h2 style='border-bottom: 1px solid #eee;'>{list_name}</h2>"
+            
             if not list_signals:
-                html_content += "<p>No new signals for this list today.</p>"
+                html_content += "<p style='color: gray;'>No new signals for this list today.</p>"
             else:
-                html_content += "<ul>"
+                html_content += "<ul style='list-style: none; padding: 0;'>"
                 for s in list_signals:
-                    # Color coding for buy/sell actions
-                    action_color = "green" if s.action.lower() == "buy" else "red"
+                    action_color = "#2ecc71" if s.action.lower() == "buy" else "#e74c3c"
                     html_content += (
-                        f"<li><b style='color:{action_color};'>{s.action.upper()}</b> "
-                        f"{s.ticker} @ ${s.price:.2f} "
-                        f"(Time: {s.timestamp.strftime('%H:%M')} UTC)</li>"
+                        f"<li style='margin-bottom: 10px; font-size: 16px;'>"
+                        f"<span style='color:{action_color}; font-weight: bold;'>{s.action.upper()}</span> "
+                        f"<strong>{s.ticker}</strong> @ ${s.price:.2f} "
+                        f"<span style='color: #95a5a6; font-size: 12px;'>({s.timestamp.strftime('%I:%M %p')})</span>"
+                        f"</li>"
                     )
                 html_content += "</ul>"
 
-        # Section: Signals from Unknown/Other lists (Catch-all)
+        # Catch-all for any other lists
         other_signals = [s for s in signals_today if s.list_name not in target_lists]
         if other_signals:
-            html_content += "<h3>Other Signals</h3><ul>"
+            html_content += "<h3>Other Lists</h3><ul>"
             for s in other_signals:
                 html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} @ ${s.price:.2f}</li>"
             html_content += "</ul>"
 
-        # Section: Global Open Positions
-        html_content += "<hr><h2>Current Open Positions</h2>"
-        if not open_positions:
-            html_content += "<p>No active positions currently in the portfolio.</p>"
-        else:
-            html_content += "<ul>"
-            for p in open_positions:
-                html_content += (
-                    f"<li><b>{p.ticker}</b> (List: {p.list_name}) - "
-                    f"Entered @ ${p.price:.2f} on {p.timestamp.strftime('%m/%d')}</li>"
-                )
-            html_content += "</ul>"
-
-        html_content += "<p style='font-size: 12px; color: gray;'>Market closes in 2 hours.</p>"
+        html_content += "<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"
 
         # 3. Send Email
-        print("Sending to Resend API...")
-        r = resend.Emails.send({
-            "from": "Trading Bridge <onboarding@resend.dev>",
+        if not signals_today:
+            print("No signals found today. Skipping email send.")
+            return
+
+        print(f"Found {len(signals_today)} signals. Sending to Resend...")
+        
+        resend.Emails.send({
+            "from": "Trading Signals <onboarding@resend.dev>",
             "to": [TARGET_EMAIL],
             "subject": subject,
             "html": html_content,
         })
         
-        if "id" in r:
-            print(f"SUCCESS: Email ID {r['id']}")
-        else:
-            print(f"API request accepted without ID. Response: {r}")
+        print("SUCCESS: Newsletter dispatched.")
 
     except Exception as e:
         print(f"ERROR: {e}")
