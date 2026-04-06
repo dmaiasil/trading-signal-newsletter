@@ -13,7 +13,7 @@ def wait_until_2h_before_close():
         
         if not schedule.empty:
             market_close = schedule.iloc[0]['market_close'].to_pydatetime()
-            target_time = market_close - datetime.timedelta(hours=2)
+            target_time = market_close - datetime.timedelta(hours=1)
             
             # If we are within 1 minute of the target time, send it!
             if abs((now - target_time).total_seconds()) < 60:
@@ -24,5 +24,5 @@ def wait_until_2h_before_close():
         time.sleep(30) # Check the clock every 30 seconds
 
 if __name__ == "__main__":
-    print("Clock is running... waiting for 2:00 PM EST.")
+    print("Clock is running... waiting for 15:00 EST.")
     wait_until_2h_before_close()
