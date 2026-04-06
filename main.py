@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from database import SessionLocal, Signal
 import datetime
+from scheduler import send_signal_alert
 
 app = FastAPI()
 
@@ -33,6 +34,10 @@ async def tradingview_webhook(request: Request):
         db.add(new_entry)
         db.commit()
         print(f"Logged {action.upper()} for {ticker} at {new_entry.timestamp}")
+        
+        # Send real-time email alert
+        send_signal_alert(ticker, action, float(price) if price else 0.0, list_name)
+        
         return {"status": "success"}
     except Exception as e:
         db.rollback()

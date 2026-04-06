@@ -10,6 +10,34 @@ load_dotenv()
 resend.api_key = os.getenv("RESEND_API_KEY")
 TARGET_EMAIL = os.getenv("TARGET_EMAIL")
 
+def send_signal_alert(ticker, action, price, list_name):
+    print(f"--- Sending Alert for {ticker} to {TARGET_EMAIL} ---")
+    
+    subject = f"New Trading Signal: {action.upper()} {ticker}"
+    action_color = "#2ecc71" if action.lower() == "buy" else "#e74c3c"
+    
+    html_content = (
+        f"<h1 style='font-family: sans-serif;'>New Trading Signal</h1>"
+        f"<p style='font-size: 16px;'>"
+        f"List: <strong>{list_name}</strong><br>"
+        f"Action: <span style='color:{action_color}; font-weight: bold;'>{action.upper()}</span><br>"
+        f"Ticker: <strong>{ticker}</strong><br>"
+        f"Price: ${price:.2f}"
+        f"</p>"
+        f"<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"
+    )
+
+    try:
+        resend.Emails.send({
+            "from": "Trading Signals <onboarding@resend.dev>",
+            "to": [TARGET_EMAIL],
+            "subject": subject,
+            "html": html_content,
+        })
+        print(f"SUCCESS: Alert dispatched for {ticker}.")
+    except Exception as e:
+        print(f"ERROR: {e}")
+
 def send_newsletter():
     print(f"--- Starting Newsletter Process for {TARGET_EMAIL} ---")
     db = SessionLocal()
