@@ -88,10 +88,6 @@ def send_newsletter():
         html_content += "<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"
 
         # 3. Send Email
-        if not signals_today:
-            print("No signals found today. Skipping email send.")
-            return
-
         print(f"Found {len(signals_today)} signals. Sending to Resend...")
         
         resend.Emails.send({
