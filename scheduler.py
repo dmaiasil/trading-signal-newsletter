@@ -24,7 +24,7 @@ def send_signal_alert(ticker, action, price, list_name):
         f"Ticker: <strong>{ticker}</strong><br>"
         f"Price: ${price:.2f}"
         f"</p>"
-        f"<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"
+        f"<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via M3 Radar, a DMS software.</p>"
     )
 
     try:
@@ -51,7 +51,7 @@ def send_newsletter():
         signals_today = db.query(Signal).filter(Signal.timestamp >= today_start).all()
 
         # 2. Build HTML
-        subject = f"Trading Signals Report: {datetime.date.today().strftime('%b %d, %Y')}"
+        subject = f"[Trading Signals Report: {datetime.date.today().strftime('%b %d, %Y')}]"
         html_content = "<h1 style='font-family: sans-serif;'>Daily Signal Summary</h1>"
         
         # Define your active list names here
