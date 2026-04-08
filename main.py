@@ -16,6 +16,7 @@ async def tradingview_webhook(request: Request):
     price = data.get("price")
     list_name = data.get("list")
     action = data.get("action", "").lower()
+    interval = data.get("interval", "daily").lower()
 
     if not ticker or action not in ["buy", "sell"]:
         return {"status": "ignored"}
@@ -27,7 +28,8 @@ async def tradingview_webhook(request: Request):
             ticker=ticker,
             action=action,
             price=float(price) if price else 0.0,
-            list_name=list_name
+            list_name=list_name,
+            interval=interval
             # Timestamp is handled automatically by database.py
         )
         
@@ -36,7 +38,7 @@ async def tradingview_webhook(request: Request):
         print(f"Logged {action.upper()} for {ticker} at {new_entry.timestamp}")
         
         # Send real-time email alert
-        send_signal_alert(ticker, action, float(price) if price else 0.0, list_name)
+        send_signal_alert(ticker, action, float(price) if price else 0.0, list_name, interval)
         
         return {"status": "success"}
     except Exception as e:

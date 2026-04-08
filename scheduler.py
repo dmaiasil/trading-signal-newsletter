@@ -10,7 +10,7 @@ load_dotenv()
 resend.api_key = os.getenv("RESEND_API_KEY")
 TARGET_EMAIL = os.getenv("TARGET_EMAIL")
 
-def send_signal_alert(ticker, action, price, list_name):
+def send_signal_alert(ticker, action, price, list_name, interval):
     print(f"--- Sending Alert for {ticker} to {TARGET_EMAIL} ---")
     
     subject = f"New Trading Signal: {action.upper()} {ticker}"
@@ -20,6 +20,7 @@ def send_signal_alert(ticker, action, price, list_name):
         f"<h1 style='font-family: sans-serif;'>New Trading Signal</h1>"
         f"<p style='font-size: 16px;'>"
         f"List: <strong>{list_name}</strong><br>"
+        f"Interval: <strong>{interval.capitalize()}</strong><br>"
         f"Action: <span style='color:{action_color}; font-weight: bold;'>{action.upper()}</span><br>"
         f"Ticker: <strong>{ticker}</strong><br>"
         f"Price: ${price:.2f}"
@@ -71,7 +72,7 @@ def send_newsletter():
                     html_content += (
                         f"<li style='margin-bottom: 10px; font-size: 16px;'>"
                         f"<span style='color:{action_color}; font-weight: bold;'>{s.action.upper()}</span> "
-                        f"<strong>{s.ticker}</strong> @ ${s.price:.2f} "
+                        f"<strong>{s.ticker}</strong> ({s.interval.capitalize() if s.interval else 'Daily'}) @ ${s.price:.2f} "
                         f"<span style='color: #95a5a6; font-size: 12px;'>({s.timestamp.strftime('%I:%M %p')})</span>"
                         f"</li>"
                     )
@@ -82,7 +83,7 @@ def send_newsletter():
         if other_signals:
             html_content += "<h3>Other Lists</h3><ul>"
             for s in other_signals:
-                html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} @ ${s.price:.2f}</li>"
+                html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} ({s.interval.capitalize() if s.interval else 'Daily'}) @ ${s.price:.2f}</li>"
             html_content += "</ul>"
 
         html_content += "<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"

@@ -21,6 +21,7 @@ class Signal(Base):
     action = Column(String) # 'buy' or 'sell'
     price = Column(Float)
     list_name = Column(String)
+    interval = Column(String) # 'daily' or 'weekly'
 
 # Create the table
 def init_db():
