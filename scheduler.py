@@ -83,7 +83,7 @@ def send_newsletter():
         if other_signals:
             html_content += "<h3>Other Lists</h3><ul>"
             for s in other_signals:
-                html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} ({s.interval.capitalize() if s.interval else 'Daily'}) @ ${s.price:.2f}</li>"
+                html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} ({s.interval.capitalize() if s.interval else 'Daily'}) @ ${s.price:.2f} (List: {s.list_name})</li>"
             html_content += "</ul>"
 
         html_content += "<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"
