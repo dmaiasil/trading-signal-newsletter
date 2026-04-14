@@ -86,6 +86,15 @@ def send_newsletter():
                 html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} ({s.interval.capitalize() if s.interval else 'Daily'}) @ ${s.price:.2f} (List: {s.list_name})</li>"
             html_content += "</ul>"
 
+        # Previous Signals History
+        previous_signals = db.query(Signal).filter(Signal.timestamp < today_start).order_by(Signal.timestamp.desc()).limit(50).all()
+        if previous_signals:
+            html_content += "<h3>Previous Signals History</h3><ul>"
+            for s in previous_signals:
+                date_str = s.timestamp.strftime('%b %d, %Y')
+                html_content += f"<li><b>{s.action.upper()}</b> {s.ticker} ({s.interval.capitalize() if s.interval else 'Daily'}) @ ${s.price:.2f} <span style='color: #95a5a6; font-size: 12px;'>({date_str})</span></li>"
+            html_content += "</ul>"
+
         html_content += "<br><hr><p style='font-size: 11px; color: #bdc3c7;'>Sent automatically via Trading Bridge Dashboard.</p>"
 
         # 3. Send Email
