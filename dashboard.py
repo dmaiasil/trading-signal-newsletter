@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 from database import engine
 
@@ -7,6 +8,35 @@ st.set_page_config(page_title="Trading Signals", page_icon="📈", layout="wide"
 
 st.title("📈 Sinais M3 USA")
 st.markdown("View and filter your real-time trading signals. Sinais não concretizados também sao registrados. Sempre cheque gráficos.")
+
+# --- TRADINGVIEW WIDGET ---
+components.html(
+    """
+    <!-- TradingView Widget BEGIN -->
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div id="tradingview_widget" style="height:100%;width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+      <script type="text/javascript">
+      new TradingView.widget(
+      {
+      "autosize": true,
+      "symbol": "NASDAQ:SPY",
+      "interval": "D",
+      "timezone": "Etc/UTC",
+      "theme": "light",
+      "style": "1",
+      "locale": "en",
+      "enable_publishing": false,
+      "allow_symbol_change": true,
+      "container_id": "tradingview_widget"
+      }
+      );
+      </script>
+    </div>
+    <!-- TradingView Widget END -->
+    """,
+    height=500,
+)
 
 # We cache the data for 10 seconds so we don't overwhelm the database 
 # if you click around the UI quickly.
@@ -51,21 +81,12 @@ else:
     col2.metric("Buy Signals", len(filtered_df[filtered_df['action'] == 'buy']))
     col3.metric("Sell Signals", len(filtered_df[filtered_df['action'] == 'sell']))
 
-    # Create a color mapping for our tiers/lists
-    unique_lists = df['list_name'].unique().tolist()
-    palette = [
-        "rgba(59, 130, 246, 0.15)", # Blue
-        "rgba(16, 185, 129, 0.15)", # Emerald
-        "rgba(245, 158, 11, 0.15)", # Amber
-        "rgba(239, 68, 68, 0.15)",  # Red
-        "rgba(139, 92, 246, 0.15)", # Violet
-        "rgba(236, 72, 153, 0.15)", # Pink
-    ]
-    # Assign a color to each tier dynamically
-    list_colors = {lst: palette[i % len(palette)] for i, lst in enumerate(unique_lists)}
-
     def highlight_tier(row):
-        color = list_colors.get(row['List'], "transparent")
+        # Highlight only Tier 1 signals (using a subtle blue background)
+        if row['List'] == 'Tier 1':
+            color = "rgba(59, 130, 246, 0.15)"
+        else:
+            color = "transparent"
         return [f"background-color: {color}"] * len(row)
 
     # --- DATA TABLE ---
