@@ -5,8 +5,8 @@ from database import engine
 # Set up the page layout
 st.set_page_config(page_title="Trading Signals", page_icon="📈", layout="wide")
 
-st.title("📈 Trading Signals Dashboard")
-st.markdown("View and filter your real-time trading signals.")
+st.title("📈 Sinais M3 USA")
+st.markdown("View and filter your real-time trading signals. Sinais não concretizados também sao registrados. Sempre cheque gráficos.")
 
 # We cache the data for 10 seconds so we don't overwhelm the database 
 # if you click around the UI quickly.
@@ -51,6 +51,29 @@ else:
     col2.metric("Buy Signals", len(filtered_df[filtered_df['action'] == 'buy']))
     col3.metric("Sell Signals", len(filtered_df[filtered_df['action'] == 'sell']))
 
+    # --- CHART ---
+    st.subheader("Signal Volume Over Time")
+    if not filtered_df.empty:
+        chart_data = filtered_df.copy()
+        chart_data['Date'] = chart_data['timestamp'].dt.date
+        
+        # Group by Date and List Name to get daily counts per tier
+        daily_counts = chart_data.groupby(['Date', 'list_name']).size().unstack(fill_value=0)
+        
+        # A cohesive color palette that provides great contrast in both Light and Dark mode
+        palette = [
+            "#3b82f6", # Blue
+            "#10b981", # Emerald
+            "#f59e0b", # Amber
+            "#ef4444", # Red
+            "#8b5cf6", # Violet
+            "#ec4899", # Pink
+        ]
+        # Cycle through colors safely if you have more lists than colors defined
+        chart_colors = [palette[i % len(palette)] for i in range(len(daily_counts.columns))]
+        
+        st.line_chart(daily_counts, color=chart_colors)
+
     # --- DATA TABLE ---
     st.subheader("Signal History")
     
@@ -61,7 +84,7 @@ else:
         months = filtered_df['Month'].unique()
         
         for month in months:
-            st.markdown(f"### 📅 {month}")
+            st.markdown(f"### {month}")
             month_df = filtered_df[filtered_df['Month'] == month]
             
             weeks = month_df['Week Window'].unique()
