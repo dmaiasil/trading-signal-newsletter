@@ -19,6 +19,13 @@ def load_data():
     
     # Convert timestamp string to actual datetime objects for better formatting
     df['timestamp'] = pd.to_datetime(df['timestamp'])
+    
+    if not df.empty:
+        df['Month'] = df['timestamp'].dt.strftime('%B %Y')
+        week_start = df['timestamp'] - pd.to_timedelta(df['timestamp'].dt.dayofweek, unit='d')
+        week_end = week_start + pd.Timedelta(days=6)
+        df['Week Window'] = week_start.dt.strftime('%b %d') + " - " + week_end.dt.strftime('%b %d')
+        
     return df
 
 df = load_data()
@@ -46,4 +53,30 @@ else:
 
     # --- DATA TABLE ---
     st.subheader("Signal History")
-    st.dataframe(filtered_df.style.format({"price": "${:.2f}"}), use_container_width=True, hide_index=True)
+    
+    if filtered_df.empty:
+        st.info("No signals match your filters.")
+    else:
+        # Display grouped by Month and Week
+        months = filtered_df['Month'].unique()
+        
+        for month in months:
+            st.markdown(f"### 📅 {month}")
+            month_df = filtered_df[filtered_df['Month'] == month]
+            
+            weeks = month_df['Week Window'].unique()
+            for week in weeks:
+                # Use expanders to make it mobile-friendly and easily scrollable
+                with st.expander(f"Week: {week}", expanded=True):
+                    week_df = month_df[month_df['Week Window'] == week].copy()
+                    
+                    # Format strings and capitalize for a cleaner display
+                    week_df['Date'] = week_df['timestamp'].dt.strftime('%b %d, %I:%M %p')
+                    week_df['action'] = week_df['action'].str.upper()
+                    
+                    # Select and rename columns for the final table
+                    display_df = week_df[['Date', 'ticker', 'action', 'price', 'list_name', 'interval']].rename(
+                        columns={'ticker': 'Ticker', 'action': 'Action', 'price': 'Price', 'list_name': 'List', 'interval': 'Interval'}
+                    )
+                    
+                    st.dataframe(display_df.style.format({"Price": "${:.2f}"}), use_container_width=True, hide_index=True)
