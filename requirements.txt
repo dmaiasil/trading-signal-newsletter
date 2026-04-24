@@ -6,3 +6,6 @@ python-dotenv==1.2.2
 pandas_market_calendars==5.3.1.2
 pydantic==2.12.5
 requests==2.33.1
+streamlit
+pandas
+psycopg2-binary 

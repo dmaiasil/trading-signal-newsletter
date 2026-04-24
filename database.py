@@ -1,12 +1,16 @@
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import datetime
 import pytz
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Database setup
-DATABASE_URL = "sqlite:////home/debs/code/trading-signal-newsletter/signals.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////home/debs/code/trading-signal-newsletter/signals.db")
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
