@@ -9,3 +9,4 @@ requests==2.33.1
 streamlit
 pandas
 psycopg2-binary 
+pytz
