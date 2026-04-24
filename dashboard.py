@@ -51,28 +51,22 @@ else:
     col2.metric("Buy Signals", len(filtered_df[filtered_df['action'] == 'buy']))
     col3.metric("Sell Signals", len(filtered_df[filtered_df['action'] == 'sell']))
 
-    # --- CHART ---
-    st.subheader("Signal Volume Over Time")
-    if not filtered_df.empty:
-        chart_data = filtered_df.copy()
-        chart_data['Date'] = chart_data['timestamp'].dt.date
-        
-        # Group by Date and List Name to get daily counts per tier
-        daily_counts = chart_data.groupby(['Date', 'list_name']).size().unstack(fill_value=0)
-        
-        # A cohesive color palette that provides great contrast in both Light and Dark mode
-        palette = [
-            "#3b82f6", # Blue
-            "#10b981", # Emerald
-            "#f59e0b", # Amber
-            "#ef4444", # Red
-            "#8b5cf6", # Violet
-            "#ec4899", # Pink
-        ]
-        # Cycle through colors safely if you have more lists than colors defined
-        chart_colors = [palette[i % len(palette)] for i in range(len(daily_counts.columns))]
-        
-        st.line_chart(daily_counts, color=chart_colors)
+    # Create a color mapping for our tiers/lists
+    unique_lists = df['list_name'].unique().tolist()
+    palette = [
+        "rgba(59, 130, 246, 0.15)", # Blue
+        "rgba(16, 185, 129, 0.15)", # Emerald
+        "rgba(245, 158, 11, 0.15)", # Amber
+        "rgba(239, 68, 68, 0.15)",  # Red
+        "rgba(139, 92, 246, 0.15)", # Violet
+        "rgba(236, 72, 153, 0.15)", # Pink
+    ]
+    # Assign a color to each tier dynamically
+    list_colors = {lst: palette[i % len(palette)] for i, lst in enumerate(unique_lists)}
+
+    def highlight_tier(row):
+        color = list_colors.get(row['List'], "transparent")
+        return [f"background-color: {color}"] * len(row)
 
     # --- DATA TABLE ---
     st.subheader("Signal History")
@@ -102,4 +96,5 @@ else:
                         columns={'ticker': 'Ticker', 'action': 'Action', 'price': 'Price', 'list_name': 'List', 'interval': 'Interval'}
                     )
                     
-                    st.dataframe(display_df.style.format({"Price": "${:.2f}"}), use_container_width=True, hide_index=True)
+                    styled_df = display_df.style.format({"Price": "${:.2f}"}).apply(highlight_tier, axis=1)
+                    st.dataframe(styled_df, use_container_width=True, hide_index=True)
