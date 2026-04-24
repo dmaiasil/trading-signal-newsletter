@@ -18,7 +18,7 @@ st.markdown("View and filter your real-time trading signals. Sinais não concret
 components.html(
     f"""
     <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget-container" style="height:100%;width:100%">
+    <div class="tradingview-widget-container" style="height:700px;width:100%">
       <div id="tradingview_widget" style="height:100%;width:100%"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
       <script type="text/javascript">
@@ -40,7 +40,7 @@ components.html(
     </div>
     <!-- TradingView Widget END -->
     """,
-    height=1000,
+    height=750,
 )
 
 # We cache the data for 10 seconds so we don't overwhelm the database 
