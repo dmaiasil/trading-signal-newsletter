@@ -6,21 +6,26 @@ from database import engine
 # Set up the page layout
 st.set_page_config(page_title="Trading Signals", page_icon="📈", layout="wide")
 
+if "selected_ticker" not in st.session_state:
+    st.session_state.selected_ticker = "NYSE:IVE"
+if "table_selections" not in st.session_state:
+    st.session_state.table_selections = {}
+
 st.title("📈 Sinais M3 USA")
 st.markdown("View and filter your real-time trading signals. Sinais não concretizados também sao registrados. Sempre cheque gráficos.")
 
 # --- TRADINGVIEW WIDGET ---
 components.html(
-    """
+    f"""
     <!-- TradingView Widget BEGIN -->
     <div class="tradingview-widget-container" style="height:100%;width:100%">
       <div id="tradingview_widget" style="height:100%;width:100%"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
       <script type="text/javascript">
       new TradingView.widget(
-      {
+      {{
       "autosize": true,
-      "symbol": "NASDAQ:SPY",
+      "symbol": "{st.session_state.selected_ticker}",
       "interval": "D",
       "timezone": "Etc/UTC",
       "theme": "light",
@@ -29,7 +34,7 @@ components.html(
       "enable_publishing": false,
       "allow_symbol_change": true,
       "container_id": "tradingview_widget"
-      }
+      }}
       );
       </script>
     </div>
@@ -82,9 +87,9 @@ else:
     col3.metric("Sell Signals", len(filtered_df[filtered_df['action'] == 'sell']))
 
     def highlight_tier(row):
-        # Highlight only Tier 1 signals (using a subtle blue background)
+        # Highlight only Tier 1 signals (using a subtle golden background)
         if row['List'] == 'Tier 1':
-            color = "rgba(59, 130, 246, 0.15)"
+            color = "rgba(218, 165, 32, 0.25)"
         else:
             color = "transparent"
         return [f"background-color: {color}"] * len(row)
@@ -117,5 +122,26 @@ else:
                         columns={'ticker': 'Ticker', 'action': 'Action', 'price': 'Price', 'list_name': 'List', 'interval': 'Interval'}
                     )
                     
+                    display_df = display_df.reset_index(drop=True)
                     styled_df = display_df.style.format({"Price": "${:.2f}"}).apply(highlight_tier, axis=1)
-                    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+                    
+                    table_key = f"table_{month}_{week}"
+                    table_state = st.dataframe(
+                        styled_df, 
+                        use_container_width=True, 
+                        hide_index=True,
+                        on_select="rerun",
+                        selection_mode="single-row",
+                        key=table_key
+                    )
+                    
+                    selected_rows = table_state.get("selection", {}).get("rows", [])
+                    prev_selection = st.session_state.table_selections.get(table_key, [])
+                    
+                    # Check if the user actively clicked a new row in this specific table
+                    if selected_rows != prev_selection:
+                        st.session_state.table_selections[table_key] = selected_rows
+                        if selected_rows:
+                            selected_idx = selected_rows[0]
+                            st.session_state.selected_ticker = display_df.iloc[selected_idx]['Ticker']
+                            st.rerun()
