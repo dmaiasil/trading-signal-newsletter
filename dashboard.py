@@ -7,7 +7,7 @@ from database import engine
 st.set_page_config(page_title="Trading Signals", page_icon="📈", layout="wide")
 
 if "selected_ticker" not in st.session_state:
-    st.session_state.selected_ticker = "NYSE:IVE"
+    st.session_state.selected_ticker = "IVE"
 if "table_selections" not in st.session_state:
     st.session_state.table_selections = {}
 
@@ -40,7 +40,7 @@ components.html(
     </div>
     <!-- TradingView Widget END -->
     """,
-    height=500,
+    height=1000,
 )
 
 # We cache the data for 10 seconds so we don't overwhelm the database 
@@ -87,9 +87,9 @@ else:
     col3.metric("Sell Signals", len(filtered_df[filtered_df['action'] == 'sell']))
 
     def highlight_tier(row):
-        # Highlight only Tier 1 signals (using a subtle golden background)
+        # Highlight only Tier 1 signals (using a soft teal background)
         if row['List'] == 'Tier 1':
-            color = "rgba(218, 165, 32, 0.25)"
+            color = "rgba(20, 184, 166, 0.25)"
         else:
             color = "transparent"
         return [f"background-color: {color}"] * len(row)
