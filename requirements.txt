@@ -8,4 +8,5 @@ pydantic==2.12.5
 requests==2.33.1
 streamlit
 pandas
-psycopg2-binary 
+psycopg2-binary
+pytz 
