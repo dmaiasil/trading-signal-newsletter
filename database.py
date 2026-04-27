@@ -19,8 +19,8 @@ class Signal(Base):
     __tablename__ = "signals"
 
     id = Column(Integer, primary_key=True, index=True)
-    # The new date/time column
-    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(pytz.timezone('US/Eastern')))
+    # Strip the tzinfo to prevent SQLAlchemy 2.0 aware/naive mixing errors on insert
+    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(pytz.timezone('US/Eastern')).replace(tzinfo=None))
     ticker = Column(String)
     action = Column(String) # 'buy' or 'sell'
     price = Column(Float)

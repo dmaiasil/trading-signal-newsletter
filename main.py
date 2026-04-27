@@ -15,8 +15,8 @@ async def tradingview_webhook(request: Request):
     ticker = data.get("ticker")
     price = data.get("price")
     list_name = data.get("list")
-    action = data.get("action", "").lower()
-    interval = data.get("interval", "daily").lower()
+    action = (data.get("action") or "").lower()
+    interval = (data.get("interval") or "daily").lower()
 
     if not ticker or action not in ["buy", "sell"]:
         return {"status": "ignored"}

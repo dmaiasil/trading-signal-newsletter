@@ -46,7 +46,7 @@ def send_newsletter():
     try:
         # 1. Get Data (Using US/Eastern to match your local database timestamps)
         tz = pytz.timezone('US/Eastern')
-        today_start = datetime.datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start = datetime.datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
         
         # Query only today's signals
         signals_today = db.query(Signal).filter(Signal.timestamp >= today_start).all()
